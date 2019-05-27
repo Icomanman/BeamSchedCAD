@@ -11,7 +11,7 @@ Public Type Beam
     dBarDia As Double
     Cc As Double
     dLinks As Integer
-    minSpace As Double
+    dMinSpace As Double
     
     dFyMain As Double
     dFySec As Double
@@ -28,17 +28,20 @@ Public Function myBeam(ByVal iRow As Integer) As Beam
     myBeam.dBarDia = dbOrigin.Offset(iRow, 2)
     myBeam.Cc = db.Range("F1")
     myBeam.dLinks = dbOrigin.Offset(iRow, 5)
-    myBeam.minSpace = db.Range("F2")
+    myBeam.dMinSpace = db.Range("F2")
     myBeam.dFyMain = db.Range("B1")
     myBeam.dFySec = db.Range("B2")
     myBeam.dFc = db.Range("B3")
 
 End Function
 
-Public Function maxBar(ByRef myBeam As Beam) As Integer
+Public Function maxBar(ByRef bm As Beam) As Integer
+
     Const iMinPcs = 2
-    Dim dBarSpac
-    maxBar = myBeam.dWidth - 2 * (Beam.Cc)
+    Dim dBarMaxCount As Double
+    
+    dBarMaxCount = (bm.dWidth - 2 * (bm.Cc + bm.dLinks) + bm.dMinSpace) / (bm.dBarDia + bm.dMinSpace)
+    maxBar = WorksheetFunction.RoundDown(dBarMaxCount, 0)
     
 End Function
 
@@ -52,12 +55,14 @@ Public Function Mn(ByRef bm As Beam) As Variant
             End If
 End Function
 
-Sub main()
+Sub calc_DB()
+    Dim ws As Object
     Dim rowCount As Integer
     Dim colCount As Integer
     Dim txt As String
     Dim dbData() As Variant
     
+    Set ws = WorksheetFunction
     Set db = Worksheets("DB")
     Set dbOrigin = db.Range("A6")
     
@@ -66,11 +71,16 @@ Sub main()
     Set dbRange = Range(dbOrigin, db.Cells(rowCount, colCount))
 
     ReDim dbData(rowCount, colCount)
+
+    txt = maxBar(myBeam(0))
     
     MsgBox txt
     
+    Set ws = Nothing
     Set db = Nothing
     Set dbOrigin = Nothing
     Set dbRange = Nothing
     
 End Sub
+
+
