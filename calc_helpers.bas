@@ -19,7 +19,7 @@ Public Type Beam
     
 End Type
 
-Function myBeam(ByVal iRow As Integer) As Beam
+Public Function myBeam(ByVal iRow As Integer) As Beam
 
     Dim prompt As String
      
@@ -35,12 +35,21 @@ Function myBeam(ByVal iRow As Integer) As Beam
 
 End Function
 
-Function maxBar(ByRef myBeam As Beam) As Integer
+Public Function maxBar(ByRef myBeam As Beam) As Integer
+    Const iMinPcs = 2
+    Dim dBarSpac
+    maxBar = myBeam.dWidth - 2 * (Beam.Cc)
     
-    maxBar = Beam.dWidth - 2 * (Beam.Cc)
-    
-    
-    
+End Function
+
+Public Function Mn(ByRef bm As Beam) As Variant
+    Dim a As Double
+    a = Ast * bm.dFyMain / (0.85 * bm.dFc * bm.dWidth)
+            If spacing(k + (4 * j)) < dBarSpac Then
+                Mn = "-"
+            Else
+               Mn = 0.9 * (Ast(k + (4 * j)) * fy * (bm.dDepth(i) - (a(i) / 2))) / 1000000
+            End If
 End Function
 
 Sub main()
