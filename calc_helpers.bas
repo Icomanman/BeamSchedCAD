@@ -17,6 +17,8 @@ Public Type Beam
     dFySec As Double
     dFc As Double
     
+    iBarNos As Integer
+    
 End Type
 
 Public Function myBeam(ByVal iRow As Integer) As Beam
@@ -33,17 +35,17 @@ Public Function myBeam(ByVal iRow As Integer) As Beam
     myBeam.dFySec = db.Range("B2")
     myBeam.dFc = db.Range("B3")
     
-    myBeam.iBarNo = db.Cells(6 + iRow, 4)
+    myBeam.iBarNos = db.Cells(6 + iRow, 4)
 
 End Function
 
-Public Function maxBar(ByRef bm As Beam) As Integer
+Public Function max_bar(ByRef bm As Beam) As Integer
 
     Const iMinPcs = 2
     Dim dBarMaxCount As Double
     
     dBarMaxCount = (bm.dWidth - 2 * (bm.Cc + bm.dLinks) + bm.dMinSpace) / (bm.dBarDia + bm.dMinSpace)
-    maxBar = WorksheetFunction.RoundDown(dBarMaxCount, 0)
+    max_bar = WorksheetFunction.RoundDown(dBarMaxCount, 0)
     
 End Function
 
@@ -61,12 +63,34 @@ Public Function Mn(ByRef bm As Beam) As Variant
             End If
 End Function
 
-Sub calc_DB()
+Function bar_nos(ByVal maxBar As Integer) As Integer()
+
+    Dim iPcs() As Integer
+    Dim i As Integer
+    Dim txt As String
+    
+    ReDim iPcs(maxBar)
+    
+    For i = 0 To maxBar - 1
+        iPcs(i) = i + 1
+        
+        txt = iPcs(i)
+        MsgBox txt
+    Next i
+    
+    bar_nos = iPcs
+        
+End Function
+
+Sub fill_DB()
     Dim ws As Object
     Dim rowCount As Integer
     Dim colCount As Integer
     Dim txt As String
     Dim dbData() As Variant
+    Dim iMaxBar As Integer
+    Dim iPcs() As Integer
+    Dim pcsRange As Range
     
     Set ws = WorksheetFunction
     Set db = Worksheets("DB")
@@ -77,10 +101,17 @@ Sub calc_DB()
     Set dbRange = Range(dbOrigin, db.Cells(rowCount, colCount))
 
     ReDim dbData(rowCount, colCount)
-
-    txt = maxBar(myBeam(0))
     
-    MsgBox txt
+    iMaxBar = max_bar(myBeam(0))
+    
+    Set pcsRange = Range(Cells(dbOrigin.Row, 4), Cells(dbOrigin.Row + iMaxBar - 1, 4))
+    
+    iPcs = bar_nos(iMaxBar)
+
+    pcsRange.Value = Application.Transpose(iPcs)
+    'pcsRange.Select
+    
+    'MsgBox txt
     
     Set ws = Nothing
     Set db = Nothing
