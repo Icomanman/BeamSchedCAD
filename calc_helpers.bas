@@ -71,8 +71,8 @@ Function bar_nos(ByVal maxBar As Integer) As Integer()
     
     ReDim iPcs(maxBar)
     
-    For i = 0 To maxBar - 1
-        iPcs(i) = i + 1
+    For i = 0 To maxBar - 2
+        iPcs(i) = i + 2
         
         txt = iPcs(i)
         MsgBox txt
@@ -91,6 +91,7 @@ Sub fill_DB()
     Dim iMaxBar As Integer
     Dim iPcs() As Integer
     Dim pcsRange As Range
+    Dim lastRow As Range
     
     Set ws = WorksheetFunction
     Set db = Worksheets("DB")
@@ -102,17 +103,24 @@ Sub fill_DB()
 
     ReDim dbData(rowCount, colCount)
     
-    iMaxBar = max_bar(myBeam(0))
+    'pcsRange and lastRow are dynamic Ranges
+    iMaxBar = max_bar(myBeam(0)) ' dynamic; as function of B
     
-    Set pcsRange = Range(Cells(dbOrigin.Row, 4), Cells(dbOrigin.Row + iMaxBar - 1, 4))
+    Set lastRow = Cells(dbOrigin.Row + iMaxBar - 1, 1)
+    Set pcsRange = Range(Cells(dbOrigin.Row, 4), Cells(dbOrigin.Row + iMaxBar - 2, 4))
     
     iPcs = bar_nos(iMaxBar)
-
     pcsRange.Value = Application.Transpose(iPcs)
-    'pcsRange.Select
     
-    'MsgBox txt
+    txt = Range("A7").Value
+    If IsEmpty(lastRow) = False Then
+        MsgBox txt
+    End If
     
+    lastRow.Select
+    
+    Set pcsRange = Nothing
+    Set lastRow = Nothing
     Set ws = Nothing
     Set db = Nothing
     Set dbOrigin = Nothing
