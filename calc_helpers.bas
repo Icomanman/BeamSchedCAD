@@ -32,6 +32,8 @@ Public Function myBeam(ByVal iRow As Integer) As Beam
     myBeam.dFyMain = db.Range("B1")
     myBeam.dFySec = db.Range("B2")
     myBeam.dFc = db.Range("B3")
+    
+    myBeam.iBarNo = db.Cells(6 + iRow, 4)
 
 End Function
 
@@ -47,6 +49,10 @@ End Function
 
 Public Function Mn(ByRef bm As Beam) As Variant
     Dim a As Double
+    Dim Ast As Double
+    
+    Ast = bm.iBarNo * 16
+    
     a = Ast * bm.dFyMain / (0.85 * bm.dFc * bm.dWidth)
             If spacing(k + (4 * j)) < dBarSpac Then
                 Mn = "-"
