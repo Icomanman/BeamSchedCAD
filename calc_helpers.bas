@@ -1,5 +1,7 @@
 Option Explicit
 
+Public PI As Double
+
 Private db As Worksheet
 Private dbRange As Range
 Private dbOrigin As Range
@@ -12,14 +14,27 @@ Public Type Beam
     Cc As Double
     dLinks As Integer
     dMinSpace As Double
+    dPhi As Double
     
     dFyMain As Double
     dFySec As Double
     dFc As Double
     
     iBarNos As Integer
+    a As Double
+    dAst As Double
+    dMn As Double
     
 End Type
+
+Public Sub Mn(ByRef bm As Beam)
+    Dim a As Double
+        
+    a = bm.dAst * bm.dFyMain / (0.85 * bm.dFc * bm.dWidth)
+            
+    bm.dMn = (bm.dAst * bm.dFyMain * (bm.dDepth - (a / 2))) / 1000000
+    
+End Sub
 
 Public Function myBeam(ByVal iRow As Integer) As Beam
 
@@ -31,16 +46,23 @@ Public Function myBeam(ByVal iRow As Integer) As Beam
     myBeam.Cc = db.Range("F1")
     myBeam.dLinks = dbOrigin.Offset(iRow, 5)
     myBeam.dMinSpace = db.Range("F2")
+    myBeam.dPhi = db.Range("F3")
     myBeam.dFyMain = db.Range("B1")
     myBeam.dFySec = db.Range("B2")
     myBeam.dFc = db.Range("B3")
     
     myBeam.iBarNos = db.Cells(6 + iRow, 4)
+    myBeam.dAst = myBeam.iBarNos * 0.25 * (myBeam.dBarDia ^ 2) * PI
+        
+    myBeam.a = myBeam.dAst * myBeam.dFyMain / (0.85 * myBeam.dFc * myBeam.dWidth)
+    myBeam.dMn = (myBeam.dAst * myBeam.dFyMain * (myBeam.dDepth - (myBeam.a / 2))) / 1000000
+    
+    dbOrigin.Offset(iRow, 4).Value = Round(myBeam.dPhi * myBeam.dMn, 2)
 
 End Function
 
 Public Function max_bar(ByRef bm As Beam) As Integer
-
+    'For single layer
     Const iMinPcs = 2
     Dim dBarMaxCount As Double
     
@@ -49,19 +71,10 @@ Public Function max_bar(ByRef bm As Beam) As Integer
     
 End Function
 
-Public Function Mn(ByRef bm As Beam) As Variant
-    Dim a As Double
-    Dim Ast As Double
-    
-    Ast = bm.iBarNo * 16
-    
-    a = Ast * bm.dFyMain / (0.85 * bm.dFc * bm.dWidth)
-            If spacing(k + (4 * j)) < dBarSpac Then
-                Mn = "-"
-            Else
-               Mn = 0.9 * (Ast(k + (4 * j)) * fy * (bm.dDepth(i) - (a(i) / 2))) / 1000000
-            End If
+Public Function max_double_layer(ByVal max_bar As Integer)
+    max_double_layer = max_bar * 2
 End Function
+
 
 Function bar_nos(ByVal maxBar As Integer) As Integer()
 
@@ -75,7 +88,7 @@ Function bar_nos(ByVal maxBar As Integer) As Integer()
         iPcs(i) = i + 2
         
         txt = iPcs(i)
-        MsgBox txt
+        'MsgBox txt
     Next i
     
     bar_nos = iPcs
@@ -102,6 +115,7 @@ Sub fill_DB()
     Set dbRange = Range(dbOrigin, db.Cells(rowCount, colCount))
 
     ReDim dbData(rowCount, colCount)
+    PI = ws.PI()
     
     'pcsRange and lastRow are dynamic Ranges
     iMaxBar = max_bar(myBeam(0)) ' dynamic; as function of B
